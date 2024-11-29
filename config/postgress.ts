@@ -17,5 +17,6 @@ export default new Sequelize({
   host: process.env.POSTGRESS_CS_HOST,
   dialect: "postgres",
   dialectModule: pg,
+  logging: false,
   dialectOptions: { ssl: { require: true, rejectUnauthorized: false } },
 });

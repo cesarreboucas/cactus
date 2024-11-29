@@ -10,8 +10,12 @@ import { Label } from "../ui/label";
 import { Switch } from "@/components/ui/switch";
 
 interface EquipmentFormProps {
-  save: (equipment: EquipmentCreationAttributes) => void;
-  initialData?: EquipmentAttributes;
+  save: (equipment: EquipmentCreationAttributes) => Promise<{
+    error: boolean;
+    id: Number;
+    message?: string;
+  }>;
+  initialData?: EquipmentCreationAttributes | null;
 }
 
 function EquipmentForm({ initialData, save }: EquipmentFormProps): JSX.Element {
@@ -36,17 +40,21 @@ function EquipmentForm({ initialData, save }: EquipmentFormProps): JSX.Element {
     setEquipment((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    save(equipment);
-    e.preventDefault();
-  };
+  async function handleSubmit() {
+    console.log("Equipment FE", equipment);
+    const res = await save(equipment);
+    console.log("Res", res);
 
-  console.log(equipment);
+    // e.preventDefault();
+  }
+
+  // console.log(equipment);
 
   return (
-    <form onSubmit={handleSubmit}>
+    // <form onSubmit={handleSubmit} className="mt-4">
+    <div className="flex flex-col p-4 border rounded-lg m-4 lg:w-3/4 lg:m-auto">
       <div>
-        <Label htmlFor="name">Name:</Label>
+        <Label htmlFor="name">Nome:</Label>
         <Input
           type="text"
           id="name"
@@ -57,7 +65,7 @@ function EquipmentForm({ initialData, save }: EquipmentFormProps): JSX.Element {
         />
       </div>
       <div>
-        <Label htmlFor="model">Model:</Label>
+        <Label htmlFor="model">Modelo:</Label>
         <Input
           type="text"
           id="model"
@@ -68,7 +76,7 @@ function EquipmentForm({ initialData, save }: EquipmentFormProps): JSX.Element {
         />
       </div>
       <div>
-        <Label htmlFor="type">Type:</Label>
+        <Label htmlFor="type">Tipo:</Label>
         <Input
           type="text"
           id="type"
@@ -79,7 +87,7 @@ function EquipmentForm({ initialData, save }: EquipmentFormProps): JSX.Element {
         />
       </div>
       <div>
-        <Label htmlFor="manufacturer">Manufacturer:</Label>
+        <Label htmlFor="manufacturer">Fabricante:</Label>
         <Input
           type="text"
           id="manufacturer"
@@ -90,7 +98,7 @@ function EquipmentForm({ initialData, save }: EquipmentFormProps): JSX.Element {
         />
       </div>
       <div>
-        <Label htmlFor="year_aquisition">Year of Acquisition:</Label>
+        <Label htmlFor="year_aquisition">Ano of Aquisi&#231;&#227;o:</Label>
         <Input
           type="number"
           id="year_aquisition"
@@ -100,73 +108,85 @@ function EquipmentForm({ initialData, save }: EquipmentFormProps): JSX.Element {
           required
         />
       </div>
-      <div>
-        <Label htmlFor="direct_cost">Direct Cost:</Label>
-        <Input
-          type="number"
-          id="direct_cost"
-          name="direct_cost"
-          value={equipment.direct_cost}
-          onChange={handleChange}
-          required
-        />
+      <div className="flex gap-4">
+        <div className="w-1/2">
+          <Label htmlFor="direct_cost">Custos Diretos:</Label>
+          <Input
+            type="number"
+            id="direct_cost"
+            name="direct_cost"
+            value={equipment.direct_cost}
+            onChange={handleChange}
+            required
+          />
+        </div>
+        <div className="w-1/2">
+          <Label htmlFor="indirect_cost">Custos Indiretos:</Label>
+          <Input
+            type="number"
+            id="indirect_cost"
+            name="indirect_cost"
+            value={equipment.indirect_cost}
+            onChange={handleChange}
+            required
+          />
+        </div>
       </div>
-      <div>
-        <Label htmlFor="indirect_cost">Indirect Cost:</Label>
-        <Input
-          type="number"
-          id="indirect_cost"
-          name="indirect_cost"
-          value={equipment.indirect_cost}
-          onChange={handleChange}
-          required
-        />
+      <div className="flex gap-4">
+        <div className="w-1/2">
+          <Label htmlFor="production_ratio_unit">
+            Unidade de Produ&#231;&#227;o:
+          </Label>
+          <Input
+            type="text"
+            id="production_ratio_unit"
+            name="production_ratio_unit"
+            value={equipment.production_ratio_unit}
+            onChange={handleChange}
+            required
+          />
+        </div>
+        <div className="w-1/2">
+          <Label htmlFor="production_ratio_value">Produ&#231;&#227;o:</Label>
+          <Input
+            type="number"
+            id="production_ratio_value"
+            name="production_ratio_value"
+            value={equipment.production_ratio_value}
+            onChange={handleChange}
+            required
+          />
+        </div>
       </div>
-      <div>
-        <Label htmlFor="production_ratio_unit">Production Ratio Unit:</Label>
-        <Input
-          type="text"
-          id="production_ratio_unit"
-          name="production_ratio_unit"
-          value={equipment.production_ratio_unit}
-          onChange={handleChange}
-          required
-        />
+      <div className="flex gap-4">
+        <div className="w-1/2">
+          <Label htmlFor="aquisition_cost">
+            Custo de Aquisi&#231;&#227;o Cost:
+          </Label>
+          <Input
+            type="number"
+            id="aquisition_cost"
+            name="aquisition_cost"
+            value={equipment.aquisition_cost}
+            onChange={handleChange}
+            required
+          />
+        </div>
+        <div className="w-1/2">
+          <Label htmlFor="depreciation_ratio">
+            Percentual de Deprecia&#231;&#227;o anual:
+          </Label>
+          <Input
+            type="number"
+            id="depreciation_ratio"
+            name="depreciation_ratio"
+            value={equipment.depreciation_ratio}
+            onChange={handleChange}
+            required
+          />
+        </div>
       </div>
-      <div>
-        <Label htmlFor="production_ratio_value">Production Ratio Value:</Label>
-        <Input
-          type="number"
-          id="production_ratio_value"
-          name="production_ratio_value"
-          value={equipment.production_ratio_value}
-          onChange={handleChange}
-          required
-        />
-      </div>
-      <div>
-        <Label htmlFor="aquisition_cost">Acquisition Cost:</Label>
-        <Input
-          type="number"
-          id="aquisition_cost"
-          name="aquisition_cost"
-          value={equipment.aquisition_cost}
-          onChange={handleChange}
-          required
-        />
-      </div>
-      <div>
-        <Label htmlFor="depreciation_ratio">Depreciation Ratio:</Label>
-        <Input
-          type="number"
-          id="depreciation_ratio"
-          name="depreciation_ratio"
-          value={equipment.depreciation_ratio}
-          onChange={handleChange}
-          required
-        />
-      </div>
-      <div>
+      <div className="my-4">
         <Switch
           id="is_enabled"
           checked={equipment.is_enabled}
@@ -176,8 +196,11 @@ function EquipmentForm({ initialData, save }: EquipmentFormProps): JSX.Element {
         />
         <Label htmlFor="is_enabled">Status:</Label>
       </div>
-      <Button type="submit">Submit</Button>
-    </form>
+      <div className="text-right my-4">
+        <Button onClick={handleSubmit}>Submit</Button>
+      </div>
+    </div>
+    // </form>
   );
 }
 
