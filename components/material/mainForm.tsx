@@ -1,52 +1,54 @@
 "use client";
 import React, { useState } from "react";
-import { EquipmentCreationAttributes } from "@/models/equipment";
+import { MaterialCreationAttributes } from "@/models/material";
 import { Input } from "@/components/ui/input";
 import { Button } from "../ui/button";
 import { Label } from "../ui/label";
 import { Switch } from "@/components/ui/switch";
 
-interface EquipmentFormProps {
-  save: (equipment: EquipmentCreationAttributes) => Promise<{
+interface MaterialFormProps {
+  save: (material: MaterialCreationAttributes) => Promise<{
     error: boolean;
     id: Number;
     message?: string;
   }>;
-  initialData?: EquipmentCreationAttributes | null;
+  initialData?: MaterialCreationAttributes | null;
 }
 
-function EquipmentForm({ initialData, save }: EquipmentFormProps): JSX.Element {
-  const [equipment, setEquipment] = useState<EquipmentCreationAttributes>({
+export default function MaterialForm({
+  initialData,
+  save,
+}: MaterialFormProps): JSX.Element {
+  const [material, setMaterial] = useState<MaterialCreationAttributes>({
     id: initialData?.id,
     name: initialData?.name || "",
-    model: initialData?.model || "",
-    is_enabled: initialData?.is_enabled || true,
     type: initialData?.type || "",
-    manufacturer: initialData?.manufacturer || "",
-    year_aquisition: initialData?.year_aquisition || 0,
+    unit_type: initialData?.unit_type || "",
+    unit_value: initialData?.unit_value || 0,
     direct_cost: initialData?.direct_cost || 0,
     indirect_cost: initialData?.indirect_cost || 0,
-    production_ratio_unit: initialData?.production_ratio_unit || "",
-    production_ratio_value: initialData?.production_ratio_value || 0,
-    aquisition_cost: initialData?.aquisition_cost || 0,
-    depreciation_ratio: initialData?.depreciation_ratio || 0,
-    uses_materials: initialData?.uses_materials || [],
+    markup: initialData?.markup || 0,
+    average_waste: initialData?.average_waste || 0,
+    width: initialData?.width || 0,
+    height: initialData?.height || 0,
+    thickness: initialData?.thickness || 0,
+    is_enabled: initialData?.is_enabled || true,
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setEquipment((prev) => ({ ...prev, [name]: value }));
+    setMaterial((prev) => ({ ...prev, [name]: value }));
   };
 
   async function handleSubmit() {
-    console.log("Equipment FE", equipment);
-    const res = await save(equipment);
+    console.log("Material FE", material);
+    const res = await save(material);
     console.log("Res", res);
 
     // e.preventDefault();
   }
 
-  // console.log(equipment);
+  // console.log(material);
 
   return (
     // <form onSubmit={handleSubmit} className="mt-4">
@@ -57,18 +59,7 @@ function EquipmentForm({ initialData, save }: EquipmentFormProps): JSX.Element {
           type="text"
           id="name"
           name="name"
-          value={equipment.name}
-          onChange={handleChange}
-          required
-        />
-      </div>
-      <div>
-        <Label htmlFor="model">Modelo:</Label>
-        <Input
-          type="text"
-          id="model"
-          name="model"
-          value={equipment.model}
+          value={material.name}
           onChange={handleChange}
           required
         />
@@ -79,33 +70,33 @@ function EquipmentForm({ initialData, save }: EquipmentFormProps): JSX.Element {
           type="text"
           id="type"
           name="type"
-          value={equipment.type}
+          value={material.type}
           onChange={handleChange}
           required
         />
       </div>
-      <div>
-        <Label htmlFor="manufacturer">Fabricante:</Label>
+      {/* <div>
+        <Label htmlFor="manufacturer">Unit:</Label>
         <Input
           type="text"
           id="manufacturer"
           name="manufacturer"
-          value={equipment.manufacturer}
+          value={material.manufacturer}
           onChange={handleChange}
           required
         />
-      </div>
-      <div>
+      </div> */}
+      {/* <div>
         <Label htmlFor="year_aquisition">Ano of Aquisi&#231;&#227;o:</Label>
         <Input
           type="number"
           id="year_aquisition"
           name="year_aquisition"
-          value={equipment.year_aquisition}
+          value={material.year_aquisition}
           onChange={handleChange}
           required
         />
-      </div>
+      </div> */}
       <div className="flex gap-4">
         <div className="w-1/2">
           <Label htmlFor="direct_cost">Custos Diretos:</Label>
@@ -113,7 +104,7 @@ function EquipmentForm({ initialData, save }: EquipmentFormProps): JSX.Element {
             type="number"
             id="direct_cost"
             name="direct_cost"
-            value={equipment.direct_cost}
+            value={material.direct_cost}
             onChange={handleChange}
             required
           />
@@ -124,7 +115,7 @@ function EquipmentForm({ initialData, save }: EquipmentFormProps): JSX.Element {
             type="number"
             id="indirect_cost"
             name="indirect_cost"
-            value={equipment.indirect_cost}
+            value={material.indirect_cost}
             onChange={handleChange}
             required
           />
@@ -132,53 +123,47 @@ function EquipmentForm({ initialData, save }: EquipmentFormProps): JSX.Element {
       </div>
       <div className="flex gap-4">
         <div className="w-1/2">
-          <Label htmlFor="production_ratio_unit">
-            Unidade de Produ&#231;&#227;o:
-          </Label>
+          <Label htmlFor="production_ratio_unit">Desperdício Médio :</Label>
           <Input
             type="text"
-            id="production_ratio_unit"
-            name="production_ratio_unit"
-            value={equipment.production_ratio_unit}
-            onChange={handleChange}
-            required
-          />
-        </div>
-        <div className="w-1/2">
-          <Label htmlFor="production_ratio_value">Produ&#231;&#227;o:</Label>
-          <Input
-            type="number"
-            id="production_ratio_value"
-            name="production_ratio_value"
-            value={equipment.production_ratio_value}
+            id="average_waste"
+            name="average_waste"
+            value={material.average_waste}
             onChange={handleChange}
             required
           />
         </div>
       </div>
       <div className="flex gap-4">
-        <div className="w-1/2">
-          <Label htmlFor="aquisition_cost">
-            Custo de Aquisi&#231;&#227;o Cost:
-          </Label>
+        <div className="w-1/3">
+          <Label htmlFor="width">Largura:</Label>
           <Input
             type="number"
-            id="aquisition_cost"
-            name="aquisition_cost"
-            value={equipment.aquisition_cost}
+            id="width"
+            name="width"
+            value={material.width}
             onChange={handleChange}
             required
           />
         </div>
-        <div className="w-1/2">
-          <Label htmlFor="depreciation_ratio">
-            Percentual de Deprecia&#231;&#227;o anual:
-          </Label>
+        <div className="w-1/3">
+          <Label htmlFor="height">Altura:</Label>
           <Input
             type="number"
-            id="depreciation_ratio"
-            name="depreciation_ratio"
-            value={equipment.depreciation_ratio}
+            id="height"
+            name="height"
+            value={material.height}
+            onChange={handleChange}
+            required
+          />
+        </div>
+        <div className="w-1/3">
+          <Label htmlFor="thickness">Espessura:</Label>
+          <Input
+            type="number"
+            id="thickness"
+            name="thickness"
+            value={material.thickness}
             onChange={handleChange}
             required
           />
@@ -187,9 +172,9 @@ function EquipmentForm({ initialData, save }: EquipmentFormProps): JSX.Element {
       <div className="my-4">
         <Switch
           id="is_enabled"
-          checked={equipment.is_enabled}
+          checked={material.is_enabled}
           onCheckedChange={(e) =>
-            setEquipment((prev) => ({ ...prev, is_enabled: e }))
+            setMaterial((prev) => ({ ...prev, is_enabled: e }))
           }
         />
         <Label htmlFor="is_enabled">Status:</Label>
@@ -201,5 +186,3 @@ function EquipmentForm({ initialData, save }: EquipmentFormProps): JSX.Element {
     // </form>
   );
 }
-
-export default EquipmentForm;

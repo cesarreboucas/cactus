@@ -1,6 +1,6 @@
 import React from "react";
-import EquipmentAttributes from "@/models/equipment";
-import Equipment from "@/models/equipment";
+import MaterialAttributes from "@/models/material";
+import Material from "@/models/material";
 import {
   Table,
   TableBody,
@@ -15,17 +15,17 @@ import Link from "next/link";
 
 // const equipmentData: EquipmentAttributes[]
 
-export default async function EquipmentPage() {
-  const equipmentData: EquipmentAttributes[] = await Equipment.findAll();
+export default async function MaterialPage() {
+  const materialData: MaterialAttributes[] = await Material.findAll();
   return (
     <div>
       <div className="text-right m-4 p-2">
         <Link href="/equipment/new" passHref>
-          <Button>Novo Equipamento</Button>
+          <Button>Novo Material</Button>
         </Link>
       </div>
       <Table>
-        <TableCaption>A list of your recent equipments.</TableCaption>
+        <TableCaption>A list of your materials.</TableCaption>
         <TableHeader>
           <TableRow>
             <TableHead className="w-[100px]">ID</TableHead>
@@ -35,16 +35,14 @@ export default async function EquipmentPage() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {equipmentData.map((equipment) => (
-            <TableRow key={equipment.id}>
-              <TableCell>{equipment.id}</TableCell>
+          {materialData.map((material) => (
+            <TableRow key={material.id}>
+              <TableCell>{material.id}</TableCell>
               <TableCell>
-                <Link href={`/equipment/${equipment.id}`}>
-                  {equipment.name}
-                </Link>
+                <Link href={`/equipment/${material.id}`}>{material.name}</Link>
               </TableCell>
-              <TableCell>{equipment.type}</TableCell>
-              <TableCell>{equipment.is_enabled}</TableCell>
+              <TableCell>{material.type}</TableCell>
+              <TableCell>{material.is_enabled}</TableCell>
             </TableRow>
           ))}
         </TableBody>
