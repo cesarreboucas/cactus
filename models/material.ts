@@ -5,55 +5,54 @@ import {
   InferAttributes,
   InferCreationAttributes,
   CreationOptional,
-  HasMany,
 } from "sequelize";
 import sequelize from "../config/postgress";
-import type Material from "./material";
+import Equipment from "./equipment";
 
-export interface EquipmentAttributes {
+export interface MaterialAttributes {
   id: number;
   name: string;
   type: string;
-  model: string;
-  manufacturer: string;
-  year_aquisition: number;
+  unit_type: string;
+  unit_value: number;
   direct_cost: number;
   indirect_cost: number;
-  production_ratio_unit: string;
-  production_ratio_value: number;
-  aquisition_cost: number;
-  depreciation_ratio: number;
-  // uses_materials: Material[];
+  markup: number;
+  average_waste: number;
+  width: number;
+  height: number;
+  thickness: number;
+  // is_used_by: Equipment[];
   is_enabled: boolean;
 }
 
-export interface EquipmentCreationAttributes
-  extends Optional<EquipmentAttributes, "id"> {}
+export interface MaterialCreationAttributes
+  extends Optional<MaterialAttributes, "id"> {}
 
-export default class Equipment extends Model<
-  InferAttributes<Equipment>,
-  InferCreationAttributes<Equipment>
+export default class Material extends Model<
+  InferAttributes<Material>,
+  InferCreationAttributes<Material>
 > {
   declare id: CreationOptional<number>;
   declare name: string;
   declare type: string;
-  declare model: string;
-  declare manufacturer: string;
-  declare year_aquisition: number;
+  declare unit_type: string;
+  declare unit_value: number;
   declare direct_cost: number;
   declare indirect_cost: number;
-  declare production_ratio_unit: string;
-  declare production_ratio_value: number;
-  declare aquisition_cost: number;
-  declare depreciation_ratio: number;
-  // declare uses_materials: Material[];
+  declare markup: number;
+  declare average_waste: number;
+  declare width: number;
+  declare height: number;
+  declare thickness: number;
+  // declare is_used_by: Equipment[];
   declare is_enabled: boolean;
 
   declare createdAt: CreationOptional<Date>;
   declare updatedAt: CreationOptional<Date>;
 }
 
-Equipment.init(
+Material.init(
   {
     id: {
       type: DataTypes.INTEGER.UNSIGNED,
@@ -68,16 +67,12 @@ Equipment.init(
       type: DataTypes.STRING,
       allowNull: false,
     },
-    model: {
+    unit_type: {
       type: DataTypes.STRING,
       allowNull: false,
     },
-    manufacturer: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    year_aquisition: {
-      type: DataTypes.INTEGER,
+    unit_value: {
+      type: DataTypes.FLOAT,
       allowNull: false,
     },
     direct_cost: {
@@ -88,30 +83,34 @@ Equipment.init(
       type: DataTypes.FLOAT,
       allowNull: false,
     },
-    production_ratio_unit: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    production_ratio_value: {
+    markup: {
       type: DataTypes.FLOAT,
       allowNull: false,
     },
-    aquisition_cost: {
+    average_waste: {
       type: DataTypes.FLOAT,
-      allowNull: true,
+      allowNull: false,
     },
-    depreciation_ratio: {
+    width: {
       type: DataTypes.FLOAT,
-      allowNull: true,
+      allowNull: false,
     },
-    // uses_materials: {
-    //   type: DataTypes.ARRAY(DataTypes.INTEGER),
-    //   allowNull: true,
-    // },
+    height: {
+      type: DataTypes.FLOAT,
+      allowNull: false,
+    },
+    thickness: {
+      type: DataTypes.FLOAT,
+      allowNull: false,
+    },
     is_enabled: {
       type: DataTypes.BOOLEAN,
       allowNull: false,
     },
+    // is_used_by: {
+    //   type: DataTypes.ARRAY(DataTypes.INTEGER),
+    //   allowNull: true,
+    // },
     createdAt: {
       type: DataTypes.DATE,
       allowNull: false,
@@ -125,6 +124,11 @@ Equipment.init(
   },
   {
     sequelize,
-    tableName: "equipment",
+    tableName: "material",
   }
 );
+
+// Material.belongsToMany(Equipment, { through: "equipment_materials" });
+// (async () => {
+//   await sequelize.sync();
+// })();
