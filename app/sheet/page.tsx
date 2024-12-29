@@ -1,5 +1,33 @@
 "use client";
-import React, { Fragment, useRef, useState } from "react";
+import React, {
+  Fragment,
+  useState,
+  useReducer,
+  useEffect,
+  useRef,
+} from "react";
+import { Input } from "@/components/ui/input";
+
+type dispatchArguments = {
+  type: string;
+  line: number;
+  property: string;
+  value: any;
+};
+type dispatchType = (action: dispatchArguments) => void;
+
+function reducer(state: any[], action: dispatchArguments) {
+  console.log("Reducer", action);
+  switch (action.type) {
+    case "updateText":
+      const newState = [...state];
+      newState[action.line][action.property] = action.value;
+      return newState;
+    default:
+      return state;
+  }
+}
+
 export default function Page() {
   const columnDefinition = [
     {
@@ -36,26 +64,20 @@ function Sheet({
 }) {
   const columnsLength = columnDefinition.length;
   const templateColumns = columnDefinition.map((column) => "1fr").join(" ");
-  //   const references: React.MutableRefObject<HTMLDivElement | null>[] =
-  //     Array.from({ length: columnsLength * data.length }, function () {
-  //       return null;
-  //     }).map(() => useRef(null));
-  const [data, setData] = useState(initialData);
+  const mainContainerRef = useRef<HTMLDivElement>(null);
+  const [data, dispatch] = useReducer(reducer, initialData);
   const [selectedCell, setSelectedCell] = useState<number | null>(null);
+  const [editCell, setEditCell] = useState<number | null>(null);
 
   function cellClickHandler(e: React.MouseEvent<HTMLDivElement>) {
     e.stopPropagation();
     if (e.detail === 1) {
       // Single Click
-      console.log("Single Click");
       setSelectedCell(Number(e.currentTarget.id));
-      //   console.log("X", references[Number(e.currentTarget.id)].current);
-      //   references[Number(e.currentTarget.id)].current?.focus();
     } else {
       // Multiple Click
-      console.log("Double Click");
+      setEditCell(Number(e.currentTarget.id));
     }
-    console.log(e);
   }
 
   function keyDownHandler(e: React.KeyboardEvent<HTMLDivElement>) {
@@ -91,8 +113,30 @@ function Sheet({
         }
         break;
       }
+      case "Enter": {
+        if (
+          selectedCell !== null &&
+          selectedCell < columnsLength * data.length - 1
+        ) {
+          setSelectedCell(selectedCell + 1);
+        }
+        break;
+      }
+      case "F2": {
+        if (selectedCell !== null) {
+          setEditCell(selectedCell);
+        }
+        break;
+      }
     }
   }
+
+  useEffect(() => {
+    if (editCell === null) {
+      // Keeps the focus on the main container when input is closed
+      mainContainerRef.current?.focus();
+    }
+  }, [editCell]);
 
   return (
     <div
@@ -100,12 +144,13 @@ function Sheet({
       tabIndex={-1} // To make the div focusable and trigger the keydown event
       style={{ gridTemplateColumns: templateColumns }}
       onKeyDown={keyDownHandler}
+      ref={mainContainerRef}
     >
       {columnDefinition.map((column) => (
         <div key={column.key}>{column.label}</div>
       ))}
 
-      {data.map((line, i) => {
+      {data.map((record, i) => {
         return (
           <Fragment key={i}>
             {columnDefinition.map((column, j) => {
@@ -113,13 +158,18 @@ function Sheet({
               return (
                 <div
                   id={index.toString()}
-                  //   tabIndex={index + 500}
                   key={index}
-                  //   ref={references[i * columnsLength + j]}
                   onClick={cellClickHandler}
                   className={`${selectedCell === index ? "bg-blue-200" : ""}`}
                 >
-                  {line[column.key]}
+                  <Cell
+                    line={i}
+                    property={column.key}
+                    value={record[column.key]}
+                    editing={editCell === index}
+                    dispatch={dispatch}
+                    setEditCell={setEditCell}
+                  />
                 </div>
               );
             })}
@@ -128,6 +178,61 @@ function Sheet({
       })}
     </div>
   );
+}
+
+function Cell({
+  line,
+  property,
+  value,
+  editing,
+  dispatch,
+  setEditCell,
+}: {
+  line: number;
+  property: string;
+  value: string;
+  editing: boolean;
+  dispatch: dispatchType;
+  setEditCell: React.Dispatch<React.SetStateAction<number | null>>;
+}) {
+  // console.log("property", property);
+  const [valueEdit, setValueEdit] = useState(value);
+  const ref = useRef<HTMLInputElement>(null);
+  function setInputValue(e: React.ChangeEvent<HTMLInputElement>) {
+    setValueEdit(e.target.value);
+    // console.log("Key inn", e.key);
+  }
+
+  function checkEnter(e: React.KeyboardEvent<HTMLInputElement>) {
+    if (e.key === "Enter") {
+      // Avoids the keydown event to be triggered in the parent div
+      e.stopPropagation();
+      dispatch({ type: "updateText", line, property, value: valueEdit });
+      setEditCell(null);
+    } else if (e.key === "Escape") {
+      setValueEdit(value);
+      setEditCell(null);
+    }
+  }
+
+  useEffect(() => {
+    if (editing) {
+      ref.current?.focus();
+    }
+  }, [editing]);
+
+  if (editing) {
+    return (
+      <Input
+        ref={ref}
+        value={valueEdit}
+        onChange={setInputValue}
+        onKeyDown={checkEnter}
+      />
+    );
+  } else {
+    return <>{value}</>;
+  }
 }
 
 const sampleData = [
