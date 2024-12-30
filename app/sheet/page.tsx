@@ -6,7 +6,6 @@ import React, {
   useEffect,
   useRef,
 } from "react";
-import { Input } from "@/components/ui/input";
 
 type dispatchArguments = {
   type: string;
@@ -16,36 +15,78 @@ type dispatchArguments = {
 };
 type dispatchType = (action: dispatchArguments) => void;
 
+type columnDefinitionType = {
+  key: string;
+  label: string;
+  type: string;
+  className?: string;
+  format?: (value: any) => string;
+};
+
+const cellPadding = "py-1 px-2";
+
 function reducer(state: any[], action: dispatchArguments) {
   console.log("Reducer", action);
   switch (action.type) {
-    case "updateText":
+    case "updateText": {
       const newState = [...state];
       newState[action.line][action.property] = action.value;
       return newState;
+    }
+    case "updateNumber": {
+      const newState = [...state];
+      let num = 0;
+      try {
+        const parsed = parseFloat(action.value);
+        if (!isNaN(parsed)) {
+          num = parsed;
+        }
+      } catch (error) {
+      } finally {
+        newState[action.line][action.property] = num;
+        switch (action.property) {
+          case "price":
+          case "quantity":
+            newState[action.line].total =
+              newState[action.line].price * newState[action.line].quantity;
+            break;
+        }
+        return newState;
+      }
+    }
     default:
       return state;
   }
 }
 
 export default function Page() {
-  const columnDefinition = [
+  const columnDefinition: columnDefinitionType[] = [
     {
       key: "item",
       label: "Item",
+      type: "text",
     },
     {
       key: "price",
       label: "Price",
+      type: "number",
+      className: "text-right",
+      format: (value: number) => `$ ${value.toFixed(2)}`,
     },
 
     {
       key: "quantity",
-      label: "Phone",
+      label: "Quantity",
+      type: "number",
+      className: "text-right",
+      format: (value: number) => `${value.toFixed(1)}`,
     },
     {
       key: "total",
       label: "Total",
+      type: "number",
+      className: "text-right",
+      format: (value: number) => `$ ${value.toFixed(2)}`,
     },
   ];
   return (
@@ -71,6 +112,11 @@ function Sheet({
 
   function cellClickHandler(e: React.MouseEvent<HTMLDivElement>) {
     e.stopPropagation();
+    if (editCell !== null) {
+      // Exit edit mode if clicking on another cell
+      setEditCell(null);
+      return;
+    }
     if (e.detail === 1) {
       // Single Click
       setSelectedCell(Number(e.currentTarget.id));
@@ -81,7 +127,10 @@ function Sheet({
   }
 
   function keyDownHandler(e: React.KeyboardEvent<HTMLDivElement>) {
-    console.log("Key Down", e.key);
+    if (editCell !== null) {
+      // Do not move selected cell when editing
+      return;
+    }
     switch (e.key) {
       case "ArrowUp": {
         if (selectedCell !== null && selectedCell >= columnsLength) {
@@ -140,7 +189,7 @@ function Sheet({
 
   return (
     <div
-      className="grid focus:outline-none"
+      className="grid gap-px focus:outline-none off"
       tabIndex={-1} // To make the div focusable and trigger the keydown event
       style={{ gridTemplateColumns: templateColumns }}
       onKeyDown={keyDownHandler}
@@ -160,11 +209,13 @@ function Sheet({
                   id={index.toString()}
                   key={index}
                   onClick={cellClickHandler}
-                  className={`${selectedCell === index ? "bg-blue-200" : ""}`}
+                  className={`outline outline-1 outline-blue-900/30 ${
+                    editCell !== index ? cellPadding : ""
+                  }  ${selectedCell === index ? "bg-blue-100 outline-2" : ""}`}
                 >
                   <Cell
                     line={i}
-                    property={column.key}
+                    column={column}
                     value={record[column.key]}
                     editing={editCell === index}
                     dispatch={dispatch}
@@ -182,14 +233,14 @@ function Sheet({
 
 function Cell({
   line,
-  property,
+  column,
   value,
   editing,
   dispatch,
   setEditCell,
 }: {
   line: number;
-  property: string;
+  column: columnDefinitionType;
   value: string;
   editing: boolean;
   dispatch: dispatchType;
@@ -202,12 +253,18 @@ function Cell({
     setValueEdit(e.target.value);
     // console.log("Key inn", e.key);
   }
+  column.format = column.format || ((value) => value);
 
   function checkEnter(e: React.KeyboardEvent<HTMLInputElement>) {
     if (e.key === "Enter") {
       // Avoids the keydown event to be triggered in the parent div
       e.stopPropagation();
-      dispatch({ type: "updateText", line, property, value: valueEdit });
+      dispatch({
+        type: column.type === "number" ? "updateNumber" : "updateText",
+        line,
+        property: column.key,
+        value: valueEdit,
+      });
       setEditCell(null);
     } else if (e.key === "Escape") {
       setValueEdit(value);
@@ -223,15 +280,21 @@ function Cell({
 
   if (editing) {
     return (
-      <Input
+      <input
         ref={ref}
+        className={`w-full ${cellPadding} rounded-sm outline outline-2 outline-blue-700 ${column.className}`}
         value={valueEdit}
         onChange={setInputValue}
         onKeyDown={checkEnter}
+        onClick={(e) => e.stopPropagation()}
       />
     );
   } else {
-    return <>{value}</>;
+    return (
+      <span className={`block w-full ${column.className}`}>
+        {column.format(value)}
+      </span>
+    );
   }
 }
 
