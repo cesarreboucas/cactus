@@ -21,7 +21,7 @@ export default async function EquipmentPage() {
     <div>
       <div className="text-right m-4 p-2">
         <Link href="/equipment/new" passHref>
-          <Button>Novo Equipamento</Button>
+          <Button>Novo Equipamento (Beta)</Button>
         </Link>
       </div>
       <Table>
